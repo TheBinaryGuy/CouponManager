@@ -16,6 +16,7 @@ using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.Swagger;
 using CouponManager.Api.Data;
 using CouponManager.Api.Repositories;
+using CouponManager.Api.Services;
 
 namespace CouponManager.Api
 {
@@ -30,6 +31,9 @@ namespace CouponManager.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
+            // Injections
+            services.AddScoped<WaitForSeconds>();
+
             // GDPR stuff
             services.Configure<CookiePolicyOptions>(options =>
             {
