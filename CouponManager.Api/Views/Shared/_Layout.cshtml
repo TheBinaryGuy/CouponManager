@@ -1,0 +1,37 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="A simple ASP.NET Core Web API & MVC starter with Authentication." />
+    <meta itemProp="name" content="CouponManager.Api" />
+    <meta itemProp="description" content="A simple ASP.NET Core Web API & MVC starter with Authentication." />
+    <meta itemProp="image" content="@($"{Context.Request.Scheme}://{Context.Request.Host}")/res/BWS.png" />
+    <meta property="og:url" content="@($"{Context.Request.Scheme}://{Context.Request.Host}")" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="CouponManager.Api" />
+    <meta property="og:description" content="A simple ASP.NET Core Web API & MVC starter with Authentication." />
+    <meta property="og:image" content="@($"{Context.Request.Scheme}://{Context.Request.Host}")/res/BWS.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="CouponManager.Api" />
+    <meta name="twitter:description" content="A simple ASP.NET Core Web API & MVC starter with Authentication." />
+
+    <title>@(ViewData["Title"] ?? "CouponManager.Api")</title>
+
+    <environment include="Development">
+        <link href="~/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    </environment>
+    <environment exclude="Development">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" />
+    </environment>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="row">
+        @RenderBody()
+    </div>
+    <partial name="ScriptsPartial" />
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

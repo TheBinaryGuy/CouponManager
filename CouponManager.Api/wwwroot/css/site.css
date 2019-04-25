@@ -1,0 +1,29 @@
+﻿@import url('https://fonts.googleapis.com/css?family=Noto+Sans:400,700');
+
+* {
+    font-family: 'Noto Sans', sans-serif;
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    font-size: 14px;
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
