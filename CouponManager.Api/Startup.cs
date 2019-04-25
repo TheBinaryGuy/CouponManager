@@ -53,7 +53,7 @@ namespace CouponManager.Api
 
             // Configures Ef Core
             services.AddDbContext<AppDbContext>(
-                options => options.UseSqlite(Configuration.GetConnectionString("DefaultConn"))
+                options => options.UseMySql(Configuration.GetConnectionString("DefaultConn"))
             );
 
             // https://nicolas.guelpa.me/blog/2017/01/11/dotnet-core-data-protection-keys-repository.html
