@@ -1,12 +1,13 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 
 namespace CouponManager.Api.Services
 {
     public class WaitForSeconds
     {
-        public async Task WaitSeconds(int milliseconds)
+        public async Task WaitSecondsAsync(int milliseconds, CancellationToken cancellationToken = default)
         {
-            await Task.Delay(milliseconds);
+            await Task.Delay(milliseconds, cancellationToken);
         }
     }
 }
