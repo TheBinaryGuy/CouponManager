@@ -3,7 +3,7 @@ solution: CouponManager.sln
 mono: none
 sudo: required
 dist: xenial
-dotnet: 2.2.202
+dotnet: 2.2.203
 script:
  - dotnet restore
  - dotnet build
