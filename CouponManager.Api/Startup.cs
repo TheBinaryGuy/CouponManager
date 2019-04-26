@@ -51,7 +51,6 @@ namespace CouponManager.Api
                         builder.AllowAnyOrigin()
                         .AllowAnyHeader()
                         .AllowAnyMethod()
-                        .AllowCredentials()
                         .Build();
                     });
             });
@@ -187,6 +186,7 @@ namespace CouponManager.Api
             app.UseCors("EnableCORS");
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+
             app.UseCookiePolicy();
             app.UseAuthentication();
             app.UseMvcWithDefaultRoute();
