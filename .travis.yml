@@ -10,3 +10,7 @@ script:
 global:
  - DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
  - DOTNET_CLI_TELEMETRY_OPTOUT=1
+notifications:
+  email:
+   - heet_mehta@hotmail.com
+   - meetjanani47@gmail.com
