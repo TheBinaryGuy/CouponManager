@@ -1,7 +1,12 @@
 language: csharp
 solution: CouponManager.sln
 mono: none
+sudo: required
+dist: xenial
 dotnet: 2.2.202
 script:
  - dotnet restore
  - dotnet build
+global:
+ - DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true
+ - DOTNET_CLI_TELEMETRY_OPTOUT=1
