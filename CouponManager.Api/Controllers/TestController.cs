@@ -35,8 +35,8 @@ namespace CouponManager.Api.Controllers
             return new JsonResult(new { Result = "Done" });
         }
 
-        [HttpPost("SendGrid")]
-        public async Task<IActionResult> SendGrid(SendEmailViewModel model)
+        [HttpPost("SendEmail")]
+        public async Task<IActionResult> SendEmail(SendEmailViewModel model)
         {
             var cancellationToken = new CancellationToken();
             var responseStatus = await _mailSender.SendEmailAsync(model, cancellationToken);
