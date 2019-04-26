@@ -1,8 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using CouponManager.Api.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CouponManager.Api.Controllers
@@ -10,7 +8,6 @@ namespace CouponManager.Api.Controllers
     [Produces("application/json")]
     [Route("cm/api/[controller]")]
     [ApiController]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class TestController : ControllerBase
     {
         private readonly WaitForSeconds _waitForSeconds;
