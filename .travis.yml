@@ -10,6 +10,13 @@ script:
 global:
  - DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
  - DOTNET_CLI_TELEMETRY_OPTOUT=1
+notifications:
+  email:
+    recipients:
+      - heet_mehta@hotmail.com
+      - meetjanani47@gmail.com
+    on_success: never
+    on_failure: always
 branches:
  only:
  - master
