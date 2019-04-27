@@ -15,7 +15,7 @@ notifications:
     recipients:
       - heet_mehta@hotmail.com
       - meetjanani47@gmail.com
-    on_success: never
+    on_success: always
     on_failure: always
 branches:
  only:
