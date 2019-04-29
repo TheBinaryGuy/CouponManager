@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using CouponManager.Api.Data;
+using System.ComponentModel.DataAnnotations;
 
 namespace CouponManager.Api.Models
 {
@@ -19,7 +20,7 @@ namespace CouponManager.Api.Models
         public int DomainId { get; set; }
 
         [Required]
-
-        public int CompanyId { get; set; }
+        public string UserId { get; set; }
+        public AppUser User { get; set; }
     }
 }

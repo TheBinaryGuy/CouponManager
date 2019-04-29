@@ -9,8 +9,5 @@ namespace CouponManager.Api.ViewModels
 
         [Required]
         public string Password { get; set; }
-
-        [Required]
-        public string CompanyUserName { get; set; }
     }
 }

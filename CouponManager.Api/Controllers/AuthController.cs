@@ -20,14 +20,12 @@ namespace CouponManager.Api.Controllers
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
-        private readonly AppDbContext _context;
         private readonly IConfiguration _config;
 
-        public AuthController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, AppDbContext context, IConfiguration config)
+        public AuthController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IConfiguration config)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _context = context;
             _config = config;
         }
 
@@ -36,13 +34,6 @@ namespace CouponManager.Api.Controllers
         [Route("login")]
         public async Task<IActionResult> LoginAsync(LoginViewModel model)
         {
-            var company = _context.Companies.FirstOrDefault(c => c.UserName == model.CompanyUserName);
-            if (company == null)
-            {
-                ModelState.AddModelError("", "No company found! Please register first.");
-                return BadRequest(model);
-            }
-
             var user = await _userManager.FindByNameAsync(model.UserName);
 
             if (user != null)
@@ -55,7 +46,7 @@ namespace CouponManager.Api.Controllers
                         new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
                         new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName),
                         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                        new Claim("CompanyId", company.Id.ToString())
+                        new Claim("UserId", user.Id)
                     };
 
                     var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:SigningKey"]));
@@ -80,14 +71,19 @@ namespace CouponManager.Api.Controllers
         [Route("register")]
         public async Task<IActionResult> RegisterAsync(RegisterViewModel model)
         {
-            var result = await _userManager.CreateAsync(new AppUser { Email = model.Email, UserName = model.UserName }, model.Password);
+            var user = new AppUser
+            {
+                Email = model.Email, UserName = model.UserName
+            };
+            var result = await _userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)
             {
                 var claims = new[]
                 {
                     new Claim(JwtRegisteredClaimNames.Sub, model.UserName),
                     new Claim(JwtRegisteredClaimNames.UniqueName, model.UserName),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    new Claim("UserId", user.Id)
                 };
 
                 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:SigningKey"]));

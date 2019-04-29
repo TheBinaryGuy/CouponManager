@@ -47,9 +47,9 @@ namespace CouponManager.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> PostAsync(CouponViewModel model)
         {
-            var companyId = int.Parse(User.Claims.Where(c => c.Type == "CompanyId").Select(c => c.Value).SingleOrDefault());
+            var userId = User.Claims.Where(c => c.Type == "UserId").Select(c => c.Value).SingleOrDefault();
             var category = await _context.Categories.FirstOrDefaultAsync(c => c.Name == model.CategoryName);
-            var domain = await _context.Domains.FirstOrDefaultAsync(c => c.Name == model.DomainName && c.CompanyId == companyId);
+            var domain = await _context.Domains.FirstOrDefaultAsync(c => c.Name == model.DomainName && c.UserId == userId);
             await _context.AddAsync(
                 new Coupon
                 {
@@ -57,7 +57,7 @@ namespace CouponManager.Api.Controllers
                     Code = model.Code,
                     CategoryId = category.Id,
                     DomainId = domain.Id,
-                    CompanyId = companyId
+                    UserId = userId
                 }
             );
             await _context.SaveChangesAsync(_cancellationToken);
