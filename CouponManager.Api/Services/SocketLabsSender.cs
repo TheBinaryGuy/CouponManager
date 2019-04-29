@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace CouponManager.Api.Services
 {
-    public class SocketLabSender : IMailSender
+    public class SocketLabsSender : IMailSender
     {
         private readonly IConfiguration _configuration;
 
-        public SocketLabSender(IConfiguration configuration)
+        public SocketLabsSender(IConfiguration configuration)
         {
             _configuration = configuration;
         }
