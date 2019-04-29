@@ -110,7 +110,8 @@ namespace CouponManager.Api
             services.AddAuthorization(options =>
             {
                 // TestPolicy
-                options.AddPolicy("TestPolicy", p => p.RequireClaim("Test", "1", "2"));
+                options.AddPolicy("Admin", p => p.RequireClaim("Role", "SuperAdmin", "Admin"));
+                options.AddPolicy("SuperAdmin", p => p.RequireClaim("Role", "SuperAdmin"));
             });
 
             // Register the Swagger generator, defining 1 or more Swagger documents
