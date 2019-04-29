@@ -15,17 +15,22 @@ namespace CouponManager.Api.Data
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
+            base.OnModelCreating(builder);
+
             builder.ApplyConfiguration(new EntityDbConfigurationCompany());
-            builder.Entity<Company>(c => c.HasIndex(co => co.UserName).IsUnique());
+            builder.Entity<Company>(c =>
+            {
+                c.HasIndex(co => co.UserName).IsUnique();
+                c.HasIndex(co => co.Url).IsUnique();
+            });
+
             builder.ApplyConfiguration(new EntityDbConfigurationDomain());
+            builder.Entity<Domain>(b => b.HasIndex(d => d.Url).IsUnique());
+
             builder.Entity<Coupon>(b =>
             {
                 b.HasIndex(c => new { c.CompanyId, c.DomainId, c.CategoryId, c.Code }).IsUnique();
             });
-            base.OnModelCreating(builder);
-            // Customize the ASP.NET Identity model and override the defaults if needed.
-            // For example, you can rename the ASP.NET Identity table names and more.
-            // Add your customizations after calling base.OnModelCreating(builder);
         }
 
         public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
@@ -58,7 +63,7 @@ namespace CouponManager.Api.Data
         public void Configure(EntityTypeBuilder<Coupon> builder)
         {
             builder.HasAlternateKey("CompanyId", "Code");
-            
+
         }
     }
 }

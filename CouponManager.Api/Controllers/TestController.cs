@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using CouponManager.Api.Data;
 using CouponManager.Api.Models;
@@ -56,9 +57,14 @@ namespace CouponManager.Api.Controllers
         [HttpPost("AddCoupon")]
         public async Task<IActionResult> AddCoupon(Coupon coupon)
         {
-            await _context.AddAsync(coupon);
-            await _context.SaveChangesAsync();
-            return NoContent();
+            await _context.AddAsync(coupon, _cancellationToken);
+            var result = await _context.SaveChangesAsync(_cancellationToken);
+            if (result == 1) return NoContent();
+            else
+            {
+                Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                return new JsonResult(new { Error = "Something bad happened." });
+            }
         }
     }
 }

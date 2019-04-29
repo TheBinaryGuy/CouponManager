@@ -31,10 +31,6 @@ namespace CouponManager.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
-            // Dependency Injection
-            services.AddScoped<WaitForSeconds>();
-            services.AddTransient<IMailSender, SocketLabSender>();
-
             // GDPR stuff
             services.Configure<CookiePolicyOptions>(options =>
             {
@@ -158,6 +154,10 @@ namespace CouponManager.Api
                     }
                 });
             });
+
+            // Dependency Injection
+            services.AddScoped<WaitForSeconds>();
+            services.AddTransient<IMailSender, SendGridSender>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)

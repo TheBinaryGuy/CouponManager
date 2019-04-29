@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using CouponManager.Api.Data;
 using CouponManager.Api.ViewModels;
+using System.Linq;
 
 namespace CouponManager.Api.Controllers
 {
@@ -19,12 +20,14 @@ namespace CouponManager.Api.Controllers
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
+        private readonly AppDbContext _context;
         private readonly IConfiguration _config;
 
-        public AuthController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IConfiguration config)
+        public AuthController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, AppDbContext context, IConfiguration config)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _context = context;
             _config = config;
         }
 
@@ -33,6 +36,13 @@ namespace CouponManager.Api.Controllers
         [Route("login")]
         public async Task<IActionResult> LoginAsync(LoginViewModel model)
         {
+            var company = _context.Companies.FirstOrDefault(c => c.UserName == model.CompanyUserName);
+            if (company == null)
+            {
+                ModelState.AddModelError("", "No company found! Please register first.");
+                return BadRequest(model);
+            }
+
             var user = await _userManager.FindByNameAsync(model.UserName);
 
             if (user != null)
@@ -42,10 +52,11 @@ namespace CouponManager.Api.Controllers
                 {
                     var claims = new[]
                     {
-                            new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
-                            new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName),
-                            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-                        };
+                        new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
+                        new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName),
+                        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                        new Claim("CompanyId", company.Id.ToString())
+                    };
 
                     var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:SigningKey"]));
                     var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
