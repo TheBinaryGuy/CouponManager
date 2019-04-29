@@ -13,6 +13,7 @@ using CouponManager.Api.ViewModels;
 using System.Linq;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Net;
+using System.Text.Encodings.Web;
 
 namespace CouponManager.Api.Controllers
 {
@@ -24,13 +25,21 @@ namespace CouponManager.Api.Controllers
         private readonly SignInManager<AppUser> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _config;
+        private readonly IMailSender _mailSender;
 
-        public AuthController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, RoleManager<IdentityRole> roleManager, IConfiguration config)
+        public AuthController(
+            UserManager<AppUser> userManager,
+            SignInManager<AppUser> signInManager,
+            RoleManager<IdentityRole> roleManager,
+            IConfiguration config,
+            IMailSender mailSender
+        )
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
             _config = config;
+            _mailSender = mailSender;
         }
 
         [AllowAnonymous]
@@ -42,11 +51,14 @@ namespace CouponManager.Api.Controllers
 
             if (user != null)
             {
-                var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
-                if (result.Succeeded)
+                var isEmailConfirmed = await _userManager.IsEmailConfirmedAsync(user);
+                if (isEmailConfirmed)
                 {
-                    var claims = new[]
+                    var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
+                    if (result.Succeeded)
                     {
+                        var claims = new[]
+                        {
                         new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
                         new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName),
                         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
@@ -54,21 +66,24 @@ namespace CouponManager.Api.Controllers
                         new Claim("Role", user.IsAdmin ? "Admin" : "User")
                     };
 
-                    var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:SigningKey"]));
-                    var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+                        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:SigningKey"]));
+                        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-                    var token = new JwtSecurityToken(issuer: _config["Jwt:Issuer"],
-                        audience: _config["Jwt:Audience"],
-                        claims: claims,
-                        expires: DateTime.Now.AddMinutes(30),
-                        signingCredentials: creds
-                    );
+                        var token = new JwtSecurityToken(issuer: _config["Jwt:Issuer"],
+                            audience: _config["Jwt:Audience"],
+                            claims: claims,
+                            expires: DateTime.Now.AddMinutes(30),
+                            signingCredentials: creds
+                        );
 
-                    return new JsonResult(new { token = new JwtSecurityTokenHandler().WriteToken(token) });
+                        return new JsonResult(new { token = new JwtSecurityTokenHandler().WriteToken(token) });
+                    }
+                    return new JsonResult(result);
                 }
+                var resendConfirmEmailUrl = Url.Action("ResendConfirmEmail", "Auth", Request.Scheme);
+                return new JsonResult(new { Error = "Please confirm your email before logging in.", resendConfirmEmailUrl });
             }
-
-            return BadRequest("User doesn't exist.");
+            return BadRequest(new { Error = "User doesn't exist." });
         }
 
         [AllowAnonymous]
@@ -82,7 +97,64 @@ namespace CouponManager.Api.Controllers
                 UserName = model.UserName,
                 IsAdmin = model.IsAdmin
             };
+
             var result = await _userManager.CreateAsync(user, model.Password);
+            if (result.Succeeded)
+            {
+                var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                var callbackUrl = Url.Action("ConfirmEmail", "Auth", new { userId = user.Id, code }, Request.Scheme);
+                var mailModel = new SendEmailViewModel
+                {
+                    ToEmails = new string[] { user.Email },
+                    Subject = "Confirm your email",
+                    HtmlBody = $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.",
+                    FromEmail = "noreply@couponmanager.com",
+                    Name = user.UserName
+                };
+                await _mailSender.SendEmailAsync(mailModel);
+            }
+
+            return new JsonResult(result);
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("[action]")]
+        public async Task<IActionResult> ResendConfirmEmail(LoginViewModel model)
+        {
+            var user = await _userManager.FindByNameAsync(model.UserName);
+            var result = await _userManager.CheckPasswordAsync(user, model.Password);
+            if (result)
+            {
+                var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                var callbackUrl = Url.Action("ConfirmEmail", "Auth", new { userId = user.Id, code }, Request.Scheme);
+                var mailModel = new SendEmailViewModel
+                {
+                    ToEmails = new string[] { user.Email },
+                    Subject = "Confirm your email",
+                    HtmlBody = $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.",
+                    FromEmail = "noreply@couponmanager.com",
+                    Name = user.UserName
+                };
+                await _mailSender.SendEmailAsync(mailModel);
+            }
+
+            return new JsonResult(result);
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> ConfirmEmail(string userId, string code)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            var result = await _userManager.ConfirmEmailAsync(user, code);
+            return new JsonResult(result);
+        }
+
+        [HttpGet("[action]/{userName}")]
+        public async Task<IActionResult> DeleteUser(string userName)
+        {
+            var user = await _userManager.FindByNameAsync(userName);
+            var result = await _userManager.DeleteAsync(user);
             return new JsonResult(result);
         }
 

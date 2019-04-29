@@ -25,6 +25,7 @@ public class SendGridSender : IMailSender
             HtmlContent = model.HtmlBody
         };
         model.ToEmails.ToList().ForEach(e => msg.AddTo(new EmailAddress(e)));
+        msg.SetClickTracking(false, false);
         var response = await client.SendEmailAsync(msg, cancellationToken);
         return response.StatusCode;
     }

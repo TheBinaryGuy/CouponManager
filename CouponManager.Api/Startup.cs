@@ -70,6 +70,7 @@ namespace CouponManager.Api
                 options.Password.RequiredLength = 8;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = false;
+                options.SignIn.RequireConfirmedEmail = true;
             })
             // Configure EF for Identity
             .AddEntityFrameworkStores<AppDbContext>()
@@ -158,7 +159,7 @@ namespace CouponManager.Api
 
             // Dependency Injection
             services.AddScoped<WaitForSeconds>();
-            services.AddTransient<IMailSender, SendGridSender>();
+            services.AddTransient<IMailSender, SocketLabsSender>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
