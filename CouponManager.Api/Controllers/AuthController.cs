@@ -12,6 +12,7 @@ using CouponManager.Api.Data;
 using CouponManager.Api.ViewModels;
 using System.Linq;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Net;
 
 namespace CouponManager.Api.Controllers
 {
@@ -90,6 +91,11 @@ namespace CouponManager.Api.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "SuperAdmin")]
         public async Task<IActionResult> RegisterRoleAsync(string roleName)
         {
+            if (await _roleManager.RoleExistsAsync(roleName))
+            {
+                Response.StatusCode = (int)HttpStatusCode.NotModified;
+                return new JsonResult(new { Result = "Role Already Exists!" });
+            }
             var role = new IdentityRole(roleName);
             var result = await _roleManager.CreateAsync(role);
             return new JsonResult(result);
