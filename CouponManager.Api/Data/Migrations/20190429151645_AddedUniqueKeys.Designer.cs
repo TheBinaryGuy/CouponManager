@@ -3,14 +3,16 @@ using System;
 using CouponManager.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace CouponManager.Api.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190429151645_AddedUniqueKeys")]
+    partial class AddedUniqueKeys
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -24,8 +26,6 @@ namespace CouponManager.Api.Data.Migrations
 
                     b.Property<int>("AccessFailedCount");
 
-                    b.Property<string>("CompanyName");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken();
 
@@ -33,8 +33,6 @@ namespace CouponManager.Api.Data.Migrations
                         .HasMaxLength(256);
 
                     b.Property<bool>("EmailConfirmed");
-
-                    b.Property<bool>("IsAdmin");
 
                     b.Property<bool>("LockoutEnabled");
 
@@ -55,8 +53,6 @@ namespace CouponManager.Api.Data.Migrations
                     b.Property<string>("SecurityStamp");
 
                     b.Property<bool>("TwoFactorEnabled");
-
-                    b.Property<string>("Url");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256);
@@ -86,6 +82,34 @@ namespace CouponManager.Api.Data.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("CouponManager.Api.Models.Company", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Email")
+                        .IsRequired();
+
+                    b.Property<string>("Name")
+                        .IsRequired();
+
+                    b.Property<string>("Url")
+                        .IsRequired();
+
+                    b.Property<string>("UserName")
+                        .IsRequired();
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Url")
+                        .IsUnique();
+
+                    b.HasIndex("UserName")
+                        .IsUnique();
+
+                    b.ToTable("Companies");
+                });
+
             modelBuilder.Entity("CouponManager.Api.Models.Coupon", b =>
                 {
                     b.Property<int>("Id")
@@ -97,17 +121,16 @@ namespace CouponManager.Api.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(12);
 
+                    b.Property<int>("CompanyId");
+
                     b.Property<int>("DomainId");
 
                     b.Property<string>("Name")
                         .IsRequired();
 
-                    b.Property<string>("UserId")
-                        .IsRequired();
-
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId", "DomainId", "CategoryId", "Code")
+                    b.HasIndex("CompanyId", "DomainId", "CategoryId", "Code")
                         .IsUnique();
 
                     b.ToTable("Coupons");
@@ -130,21 +153,18 @@ namespace CouponManager.Api.Data.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<int>("CompanyId");
+
                     b.Property<string>("Name")
                         .IsRequired();
 
                     b.Property<string>("Url")
                         .IsRequired();
 
-                    b.Property<string>("UserId")
-                        .IsRequired();
-
                     b.HasKey("Id");
 
                     b.HasIndex("Url")
                         .IsUnique();
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Domains");
                 });
@@ -254,22 +274,6 @@ namespace CouponManager.Api.Data.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens");
-                });
-
-            modelBuilder.Entity("CouponManager.Api.Models.Coupon", b =>
-                {
-                    b.HasOne("CouponManager.Api.Data.AppUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("CouponManager.Api.Models.Domain", b =>
-                {
-                    b.HasOne("CouponManager.Api.Data.AppUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

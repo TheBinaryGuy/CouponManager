@@ -31,10 +31,6 @@ namespace CouponManager.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
-            // Dependency Injection
-            services.AddScoped<WaitForSeconds>();
-            services.AddTransient<IMailSender, SocketLabSender>();
-
             // GDPR stuff
             services.Configure<CookiePolicyOptions>(options =>
             {
@@ -114,7 +110,8 @@ namespace CouponManager.Api
             services.AddAuthorization(options =>
             {
                 // TestPolicy
-                options.AddPolicy("TestPolicy", p => p.RequireClaim("Test", "1", "2"));
+                options.AddPolicy("Admin", p => p.RequireClaim("Role", "SuperAdmin", "Admin"));
+                options.AddPolicy("SuperAdmin", p => p.RequireClaim("Role", "SuperAdmin"));
             });
 
             // Register the Swagger generator, defining 1 or more Swagger documents
@@ -158,6 +155,10 @@ namespace CouponManager.Api
                     }
                 });
             });
+
+            // Dependency Injection
+            services.AddScoped<WaitForSeconds>();
+            services.AddTransient<IMailSender, SendGridSender>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)

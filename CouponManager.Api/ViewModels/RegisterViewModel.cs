@@ -12,5 +12,6 @@ namespace CouponManager.Api.ViewModels
 
         [Required]
         public string Password { get; set; }
+        public bool IsAdmin { get; set; } = false;
     }
 }

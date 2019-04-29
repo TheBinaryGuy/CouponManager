@@ -10,6 +10,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using CouponManager.Api.Data;
 using CouponManager.Api.ViewModels;
+using System.Linq;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Net;
 
 namespace CouponManager.Api.Controllers
 {
@@ -19,12 +22,14 @@ namespace CouponManager.Api.Controllers
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _config;
 
-        public AuthController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IConfiguration config)
+        public AuthController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, RoleManager<IdentityRole> roleManager, IConfiguration config)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _roleManager = roleManager;
             _config = config;
         }
 
@@ -42,10 +47,12 @@ namespace CouponManager.Api.Controllers
                 {
                     var claims = new[]
                     {
-                            new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
-                            new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName),
-                            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-                        };
+                        new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
+                        new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName),
+                        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                        new Claim("UserId", user.Id),
+                        new Claim("Role", user.IsAdmin ? "Admin" : "User")
+                    };
 
                     var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:SigningKey"]));
                     var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -69,30 +76,29 @@ namespace CouponManager.Api.Controllers
         [Route("register")]
         public async Task<IActionResult> RegisterAsync(RegisterViewModel model)
         {
-            var result = await _userManager.CreateAsync(new AppUser { Email = model.Email, UserName = model.UserName }, model.Password);
-            if (result.Succeeded)
+            var user = new AppUser
             {
-                var claims = new[]
-                {
-                    new Claim(JwtRegisteredClaimNames.Sub, model.UserName),
-                    new Claim(JwtRegisteredClaimNames.UniqueName, model.UserName),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-                };
+                Email = model.Email,
+                UserName = model.UserName,
+                IsAdmin = model.IsAdmin
+            };
+            var result = await _userManager.CreateAsync(user, model.Password);
+            return new JsonResult(result);
+        }
 
-                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:SigningKey"]));
-                var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-                var token = new JwtSecurityToken(issuer: _config["Jwt:Issuer"],
-                    audience: _config["Jwt:Audience"],
-                    claims: claims,
-                    expires: DateTime.Now.AddDays(7),
-                    signingCredentials: creds
-                );
-
-                return new JsonResult(new { token = new JwtSecurityTokenHandler().WriteToken(token) });
+        [HttpPost]
+        [Route("register/role")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "SuperAdmin")]
+        public async Task<IActionResult> RegisterRoleAsync(string roleName)
+        {
+            if (await _roleManager.RoleExistsAsync(roleName))
+            {
+                Response.StatusCode = (int)HttpStatusCode.NotModified;
+                return new JsonResult(new { Result = "Role Already Exists!" });
             }
-
-            return BadRequest(new { Error = "Somthing went wrong." });
+            var role = new IdentityRole(roleName);
+            var result = await _roleManager.CreateAsync(role);
+            return new JsonResult(result);
         }
     }
 }
