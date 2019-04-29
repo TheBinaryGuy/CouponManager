@@ -1,5 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using CouponManager.Api.Data;
+using CouponManager.Api.Models;
 using CouponManager.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,13 +15,16 @@ namespace CouponManager.Api.Controllers
         private readonly WaitForSeconds _waitForSeconds;
         private readonly IMailSender _mailSender;
 
+        private readonly AppDbContext _context;
+
         private readonly CancellationTokenSource _tokenSource;
         private readonly CancellationToken _cancellationToken;
 
-        public TestController(WaitForSeconds waitForSeconds, IMailSender mailSender)
+        public TestController(WaitForSeconds waitForSeconds, IMailSender mailSender, AppDbContext context)
         {
             _waitForSeconds = waitForSeconds;
             _mailSender = mailSender;
+            _context = context;
 
             _tokenSource = new CancellationTokenSource();
             _cancellationToken = _tokenSource.Token;
@@ -46,6 +51,14 @@ namespace CouponManager.Api.Controllers
 
             Response.StatusCode = (int)responseStatus;
             return new JsonResult(new { Result = responseStatus.ToString() });
+        }
+
+        [HttpPost("AddCoupon")]
+        public async Task<IActionResult> AddCoupon(Coupon coupon)
+        {
+            await _context.AddAsync(coupon);
+            await _context.SaveChangesAsync();
+            return NoContent();
         }
     }
 }

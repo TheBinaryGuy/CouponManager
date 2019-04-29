@@ -3,14 +3,16 @@ using System;
 using CouponManager.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace CouponManager.Api.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20190429092555_AddedCategoriesTable")]
+    partial class AddedCategoriesTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -72,8 +74,7 @@ namespace CouponManager.Api.Data.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("Name")
-                        .IsRequired();
+                    b.Property<string>("Name");
 
                     b.HasKey("Id");
 
@@ -99,9 +100,6 @@ namespace CouponManager.Api.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserName")
-                        .IsUnique();
-
                     b.ToTable("Companies");
                 });
 
@@ -125,7 +123,7 @@ namespace CouponManager.Api.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CompanyId", "DomainId", "CategoryId", "Code")
+                    b.HasIndex("CompanyId", "Code")
                         .IsUnique();
 
                     b.ToTable("Coupons");
