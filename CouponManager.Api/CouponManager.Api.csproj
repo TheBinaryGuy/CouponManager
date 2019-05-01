@@ -5,12 +5,8 @@
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
     <RootNamespace>CouponManager.Api</RootNamespace>
     <UserSecretsId>45f542ed-3438-4891-a545-db60782313a3</UserSecretsId>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="Data\Migrations\20190429185310_AddedLots.cs" />
-    <Compile Remove="Data\Migrations\20190429185310_AddedLots.Designer.cs" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
