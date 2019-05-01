@@ -1,4 +1,4 @@
  {
   "schemaVersion" :2 ,
-  "dockerfilePath" :"./BrownNews/Dockerfile"
+  "dockerfilePath" :"./CouponManager.Api/Dockerfile"
  }
