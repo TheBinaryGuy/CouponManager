@@ -17,6 +17,7 @@ using Swashbuckle.AspNetCore.Swagger;
 using CouponManager.Api.Data;
 using CouponManager.Api.Repositories;
 using CouponManager.Api.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace CouponManager.Api
 {
@@ -77,7 +78,7 @@ namespace CouponManager.Api
             // To handle token generation for things like confirmation, forgot pass, etc.
             .AddDefaultTokenProviders();
 
-            services.AddAuthentication()
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             // Add Cookie Authentication
             .AddCookie(options =>
             {
@@ -111,8 +112,8 @@ namespace CouponManager.Api
             services.AddAuthorization(options =>
             {
                 // TestPolicy
-                options.AddPolicy("Admin", p => p.RequireClaim("Role", "SuperAdmin", "Admin"));
-                options.AddPolicy("SuperAdmin", p => p.RequireClaim("Role", "SuperAdmin"));
+                options.AddPolicy("A", p => p.RequireClaim("Role", "SuperAdmin", "Admin"));
+                options.AddPolicy("SA", p => p.RequireClaim("Role", "SuperAdmin"));
             });
 
             // Register the Swagger generator, defining 1 or more Swagger documents
@@ -159,7 +160,8 @@ namespace CouponManager.Api
 
             // Dependency Injection
             services.AddScoped<WaitForSeconds>();
-            services.AddTransient<IMailSender, SocketLabsSender>();
+            services.AddTransient<IMailSender, SendGridSender>();
+            services.AddScoped<ICouponService, CouponService>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)

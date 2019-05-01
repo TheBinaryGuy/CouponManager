@@ -10,8 +10,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using CouponManager.Api.Data;
 using CouponManager.Api.ViewModels;
-using System.Linq;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Net;
 using System.Text.Encodings.Web;
 
@@ -42,7 +40,6 @@ namespace CouponManager.Api.Controllers
             _mailSender = mailSender;
         }
 
-        [AllowAnonymous]
         [HttpPost]
         [Route("login")]
         public async Task<IActionResult> LoginAsync(LoginViewModel model)
@@ -86,7 +83,6 @@ namespace CouponManager.Api.Controllers
             return BadRequest(new { Error = "User doesn't exist." });
         }
 
-        [AllowAnonymous]
         [HttpPost]
         [Route("register")]
         public async Task<IActionResult> RegisterAsync(RegisterViewModel model)
@@ -101,6 +97,8 @@ namespace CouponManager.Api.Controllers
             var result = await _userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)
             {
+                if (user.IsAdmin) await _userManager.AddToRolesAsync(user, new string[] { "Admin", "User" });
+                else await _userManager.AddToRoleAsync(user, "User");
                 var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 var callbackUrl = Url.Action("ConfirmEmail", "Auth", new { userId = user.Id, code }, Request.Scheme);
                 var mailModel = new SendEmailViewModel
@@ -117,7 +115,6 @@ namespace CouponManager.Api.Controllers
             return new JsonResult(result);
         }
 
-        [AllowAnonymous]
         [HttpPost]
         [Route("[action]")]
         public async Task<IActionResult> ResendConfirmEmail(LoginViewModel model)
@@ -151,6 +148,7 @@ namespace CouponManager.Api.Controllers
         }
 
         [HttpGet("[action]/{userName}")]
+        [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> DeleteUser(string userName)
         {
             var user = await _userManager.FindByNameAsync(userName);
@@ -160,7 +158,7 @@ namespace CouponManager.Api.Controllers
 
         [HttpPost]
         [Route("register/role")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "SuperAdmin")]
+        [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> RegisterRoleAsync(string roleName)
         {
             if (await _roleManager.RoleExistsAsync(roleName))
