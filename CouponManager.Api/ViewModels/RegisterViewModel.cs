@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace CouponManager.Api.ViewModels
@@ -12,6 +13,7 @@ namespace CouponManager.Api.ViewModels
         public string Email { get; set; }
         [Required]
         public string Password { get; set; }
+        public Uri Url { get; set; }
         public bool IsAdmin { get; set; } = false;
     }
 }
