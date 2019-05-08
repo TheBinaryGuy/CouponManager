@@ -172,6 +172,7 @@ namespace CouponManager.Api
                 app.UseSwagger();
 
                 app.UseDeveloperExceptionPage();
+                app.UseHttpsRedirection();
 
                 // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), 
                 // specifying the Swagger JSON endpoint.
@@ -188,7 +189,6 @@ namespace CouponManager.Api
             }
 
             app.UseCors("EnableCORS");
-            app.UseHttpsRedirection();
             app.UseStaticFiles();
 
             app.UseCookiePolicy();
