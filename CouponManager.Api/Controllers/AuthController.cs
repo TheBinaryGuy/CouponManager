@@ -91,7 +91,8 @@ namespace CouponManager.Api.Controllers
             {
                 Email = model.Email,
                 UserName = model.UserName,
-                IsAdmin = model.IsAdmin
+                IsAdmin = model.IsAdmin,
+                Url = model.Url
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
