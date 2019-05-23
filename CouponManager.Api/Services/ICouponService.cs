@@ -11,5 +11,7 @@ namespace CouponManager.Api.Services
         IQueryable<Coupon> GetAsync(int limit, int offset);
         Task<Coupon> GetAsync(string couponName, CancellationToken _cancellationToken = default);
         Task AddAsync(CouponViewModel model, string userId, CancellationToken _cancellationToken = default);
+        Task PutAsync(CouponViewModel model, string userId, CancellationToken _cancellationToken = default);
+        Task DeleteAsync(CouponDeleteViewModel model, string userId, CancellationToken _cancellationToken = default);
     }
 }

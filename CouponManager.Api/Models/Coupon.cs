@@ -20,7 +20,7 @@ namespace CouponManager.Api.Models
         public AppUser User { get; set; }
         public DateTimeOffset CreatedAt { get; } = DateTime.Now;
         public string CreatedBy { get; set; }
-        public DateTimeOffset ModifiedAt { get; } = DateTime.Now;
+        public DateTimeOffset ModifiedAt { get; set; }
         public string ModifiedBy { get; set; }
     }
 }
